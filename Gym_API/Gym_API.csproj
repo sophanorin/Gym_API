@@ -21,6 +21,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.5" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,14 +31,27 @@
     <None Remove="Microsoft.EntityFrameworkCore.Design" />
     <None Remove="Models\" />
     <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
-    <None Remove="Authentication\" />
     <None Remove="Microsoft.AspNetCore.Identity" />
     <None Remove="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <None Remove="Shared\" />
+    <None Remove="Dto\" />
+    <None Remove="Services\" />
+    <None Remove="Common\" />
+    <None Remove="Common\Middleware\" />
+    <None Remove="Common\Middleware\Exception\" />
+    <None Remove="Models\Base\" />
+    <None Remove="Services\Interfaces\" />
+    <None Remove="BCrypt.Net-Next" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="Authentication\" />
     <Folder Include="Shared\" />
+    <Folder Include="Dto\" />
+    <Folder Include="Services\" />
+    <Folder Include="Common\" />
+    <Folder Include="Common\Middleware\" />
+    <Folder Include="Common\Middleware\Exception\" />
+    <Folder Include="Models\Base\" />
+    <Folder Include="Services\Interfaces\" />
   </ItemGroup>
 </Project>
