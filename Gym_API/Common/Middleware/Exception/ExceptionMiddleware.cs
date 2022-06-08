@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gym_API.Common.Middleware.Exception
 {
@@ -22,7 +23,21 @@ namespace Gym_API.Common.Middleware.Exception
 
                 await _next(httpContext);
 
-            }catch (BadHttpRequestException ex)
+            }
+            catch (DbUpdateException ex)
+            {
+                message = ex.InnerException?.Message;
+                statusCode = 500;
+
+                httpContext.Response.StatusCode = statusCode;
+
+                await httpContext.Response.WriteAsync(new ErrorDetails()
+                {
+                    StatusCode = statusCode,
+                    Message = message
+                }.ToString());
+            }
+            catch (BadHttpRequestException ex)
             {
                 message = ex.Message;
                 statusCode = ex.StatusCode;
@@ -77,7 +92,7 @@ namespace Gym_API.Common.Middleware.Exception
                     Message = message
                 }.ToString());
             }
-
+            
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Gym_API.Dto;
 using Gym_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,10 +24,23 @@ namespace Gym_API.Controllers
         }
 
         [HttpGet]
-        [Route("{id}")]
-        public async Task<IActionResult> GetUser(string Id)
+        public async Task<IActionResult> GetUserInfos()
         {
-            return Ok(await _userService.GetUser(Id));
+            return Ok(await _userService.GetUserInfos());
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetUserInfo(string Id)
+        {
+            return Ok(await _userService.GetUserInfo(Id));
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateUserInfo(string Id, [FromBody] UserInfoDto body)
+        {
+            return Ok(await _userService.UpdateUserInfo(Id,body));
         }
     }
 }

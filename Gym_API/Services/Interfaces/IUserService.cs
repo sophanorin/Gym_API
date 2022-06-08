@@ -1,16 +1,14 @@
 ﻿using System;
 using Gym_API.Dto;
+using Gym_API.Shared;
 
 namespace Gym_API.Services.Interfaces
 {
 	public interface IUserService
 	{
-		public Task<dynamic> GetUser(string id);
-
-		public dynamic GetCoachInfo(string id);
-		public dynamic GetCustomerInfo(string id);
-		public dynamic GetSupervisorInfo(string id);
-
-	}
+		public Task<dynamic> GetUserInfo(string Id);
+		public Task<Response> UpdateUserInfo(string coachId, UserInfoDto data);
+		public Task<List<dynamic>> GetUserInfos();
+ 	}
 }
 

@@ -42,6 +42,7 @@
     <None Remove="Models\Base\" />
     <None Remove="Services\Interfaces\" />
     <None Remove="BCrypt.Net-Next" />
+    <None Remove="Services\Abstracts\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -53,5 +54,6 @@
     <Folder Include="Common\Middleware\Exception\" />
     <Folder Include="Models\Base\" />
     <Folder Include="Services\Interfaces\" />
+    <Folder Include="Services\Abstracts\" />
   </ItemGroup>
 </Project>

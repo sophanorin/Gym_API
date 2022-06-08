@@ -4,7 +4,7 @@ using Gym_API.Models;
 
 namespace Gym_API.Dto
 {
-	public class UserDto
+	public class ResUserInfoDto
 	{
         public string Id { get; set; }
 

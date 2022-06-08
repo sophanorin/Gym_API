@@ -11,9 +11,9 @@ namespace Gym_API.Models.Base
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
 
-        public string GenderId { get; set; }
+        public virtual string GenderId { get; set; }
 
-        public Gender Gender { get; set; }
+        public virtual Gender Gender { get; set; }
         public User UserCredential { get; set; }
     }
 }

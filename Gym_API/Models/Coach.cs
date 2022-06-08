@@ -9,12 +9,12 @@ namespace Gym_API.Models
 
         public int WorkingHours { get; set; }
 
-        public string StatusId { get; set; }
-        public string SpecializationId { get; set; }
+        public virtual string? StatusId { get; set; }
+        public virtual string? SpecializationId { get; set; }
 
 
-        public Status Status { get; set; }
-        public Specialization Specialization { get; set; }
+        public virtual Status? Status { get; set; }
+        public virtual Specialization? Specialization { get; set; }
 
     }
 }
