@@ -149,7 +149,7 @@ namespace Gym_API.Services
             return new Response { Status = "Success", Message = "User Created Successfully" };
         }
 
-        public async Task<Response> RegisterAdmin(RegisterDto model)
+        public async Task<Response> RegisterAdmin(AdminRegisterDto model)
         {
             var userExist = await this._userManager.FindByNameAsync(model.Username);
 
@@ -163,27 +163,12 @@ namespace Gym_API.Services
                 Email = model.Email,
                 UserName = model.Username,
                 SecurityStamp = Guid.NewGuid().ToString(),
+                PasswordHash = BCryptNet.HashPassword(model.Password),
+                IsAdmin = true
             };
 
-            var result = await this._userManager.CreateAsync(user, model.Password);
-
-            if (!result.Succeeded)
-            {
-                throw new HttpRequestException("User creation faild", null, HttpStatusCode.Forbidden);
-            }
-
-            var supervisor = new Supervisor
-            {
-                Id = user.Id,
-                Fullname = model.Fullname,
-                DateOfBirth = model.DateOfBirth,
-                Email = model.Email,
-                GenderId = model.GenderId,
-                PhoneNumber = model.PhoneNumber,
-            };
-
-            user.Supervisor = supervisor;
-
+            _db.Users.Add(user);
+            _db.SaveChanges();
 
             if (!await this._roleManager.RoleExistsAsync(UserRoles.Admin))
                 await this._roleManager.CreateAsync(new Role(UserRoles.Admin));

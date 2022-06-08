@@ -30,6 +30,20 @@ namespace Gym_API.Services
                 throw new HttpRequestException($"User Id {Id} not found", null, HttpStatusCode.NotFound);
             }
 
+            if (user.IsAdmin)
+            {
+                return new
+                {
+                    Id = user.Id,
+                    Fullname = user.UserName,
+                    DateOfBirth = "",
+                    PhoneNumber = "",
+                    Email = "admin@gym.com",
+                    Gender = "",
+                    Roles = await this._userManager.GetRolesAsync(user)
+                };
+            }
+
             if (user.CoachId != null)
             {
                 return await this.GetCoachInfo(user);
