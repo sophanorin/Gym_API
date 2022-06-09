@@ -32,17 +32,24 @@ namespace Gym_API.Controllers
         }
 
         [HttpPost]
-        [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto body)
+        [Route("RegisterCustomer")]
+        public async Task<IActionResult> RegisterCustomer([FromBody] RegisterCustomerDto body)
         {
-            return Ok(await this._authenticationService.Register(body));
+            return Ok(await this._authenticationService.RegisterCustomer(body));
         }
 
         [HttpPost]
-        [Route("RegisterAdmin")]
-        public async Task<IActionResult> RegisterAdmin([FromBody] AdminRegisterDto body)
+        [Route("RegisterStuff")]
+        public async Task<IActionResult> RegisterStuff([FromBody] RegisterStuffDto body)
         {
-            return Ok(await this._authenticationService.RegisterAdmin(body));
+            return Ok(await this._authenticationService.RegisterStuff(body));
+        }
+
+        [HttpPost]
+        [Route("RegisterSeniorSupervisor")]
+        public async Task<IActionResult> RegisterSeniorSupervisor([FromBody] RegisterStuffDto body)
+        {
+            return Ok(await this._authenticationService.RegisterSeniorSupervisor(body));
         }
 
         [HttpPost]

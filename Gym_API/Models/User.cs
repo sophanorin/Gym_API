@@ -5,7 +5,8 @@ namespace Gym_API.Models
 {
     public class User : IdentityUser
     {
-        public bool IsAdmin { get; set; } = false;
+        public bool IsCustomer { get; set; } = true;
+        public bool IsStuff { get; set; } = false;
 
         public string? CoachId { get; set; }
         public string? CustomerId { get; set; }

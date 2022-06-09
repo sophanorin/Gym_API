@@ -7,7 +7,7 @@ namespace Gym_API.Models
     public class Coach : Person
     {
 
-        public int WorkingHours { get; set; }
+        public int WorkingHours { get; set; } = 0;
 
         public virtual string? StatusId { get; set; }
         public virtual string? SpecializationId { get; set; }

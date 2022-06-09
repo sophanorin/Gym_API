@@ -24,14 +24,14 @@ namespace Gym_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserInfos()
+        public async Task<IActionResult> GetUserInfos(string type)
         {
-            return Ok(await _userService.GetUserInfos());
+            return Ok(await _userService.GetUserInfos(type));
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetUserInfo(string Id)
+        public async Task<IActionResult> GetUserInfo(string Id = "customer")
         {
             return Ok(await _userService.GetUserInfo(Id));
         }
@@ -40,7 +40,14 @@ namespace Gym_API.Controllers
         [Route("{id}")]
         public async Task<IActionResult> UpdateUserInfo(string Id, [FromBody] UserInfoDto body)
         {
-            return Ok(await _userService.UpdateUserInfo(Id,body));
+            return Ok(await _userService.UpdateUserInfo(Id, body));
+        }
+
+        [HttpGet]
+        [Route("roles/{id}")]
+        public async Task<IActionResult> GetUserRoles(string Id)
+        {
+            return Ok(await _userService.GetUserRoles(Id));
         }
     }
 }

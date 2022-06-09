@@ -1,11 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Gym_API.Shared;
 
 namespace Gym_API.Dto
 {
-    public class RegisterDto
-    {
+	public class RegisterBaseDto
+	{
         [Required(ErrorMessage = "Fullname is required")]
         public string Fullname { get; set; }
 
@@ -26,11 +25,6 @@ namespace Gym_API.Dto
 
         [Required(ErrorMessage = "GenderId is required")]
         public string GenderId { get; set; }
-
-        [Required(ErrorMessage = "RoleId is required")]
-        public string RoleId { get; set; }
-
-        public string? StatusId { get; set; }
-        public string? SpecializationId { get; set; }
     }
 }
+

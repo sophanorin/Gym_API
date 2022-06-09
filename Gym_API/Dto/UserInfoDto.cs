@@ -13,6 +13,8 @@ namespace Gym_API.Dto
 
         public string GenderId { get; set; }
 
+        public int? WorkingHours { get; set; }
+
         public string? StatusId { get; set; }
 
         public string? SpecializationId { get; set; }

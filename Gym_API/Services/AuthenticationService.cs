@@ -66,12 +66,12 @@ namespace Gym_API.Services
 
             await this._userManager.RemoveFromRolesAsync(userExist, roleNames);
 
-            return new Response { Message = $"Remove roles from user {userExist.UserName} successfully", Status="Success" };
+            return new Response { Message = $"Remove roles from user {userExist.UserName} successfully", Status = "Success" };
         }
 
-        public async Task<Response> Register(RegisterDto model)
+        public async Task<Response> RegisterCustomer(RegisterCustomerDto model)
         {
-            var userExist = await this._userManager.FindByNameAsync(model.Username);
+            var userExist = await GetUserByUsernameAsync(model.Username);
 
             if (userExist != null)
             {
@@ -89,6 +89,45 @@ namespace Gym_API.Services
             _db.Users.Add(user);
             _db.SaveChanges();
 
+            var customer = new Customer
+            {
+                Id = user.Id,
+                Fullname = model.Fullname,
+                DateOfBirth = model.DateOfBirth,
+                Email = model.Email,
+                GenderId = model.GenderId,
+                PhoneNumber = model.PhoneNumber,
+            };
+
+            user.Customer = customer;
+
+            await this._userManager.AddToRoleAsync(user, UserRoles.Customer);
+
+            return new Response { Status = "Success", Message = "User Created Successfully" };
+        }
+
+        public async Task<Response> RegisterStuff(RegisterStuffDto model)
+        {
+            var userExist = await GetUserByUsernameAsync(model.Username);
+
+            if (userExist != null)
+            {
+                throw new HttpRequestException("User already existed", null, HttpStatusCode.Forbidden);
+            }
+
+            User user = new User()
+            {
+                Email = model.Email,
+                UserName = model.Username,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                PasswordHash = BCryptNet.HashPassword(model.Password),
+                IsStuff = true,
+                IsCustomer = false
+            };
+
+            _db.Users.Add(user);
+            _db.SaveChanges();
+
             var role = await this._roleManager.FindByIdAsync(model.RoleId);
 
             if (role == null)
@@ -99,6 +138,8 @@ namespace Gym_API.Services
             switch (role.Name)
             {
                 case UserRoles.Coach:
+                case UserRoles.SeniorCoach:
+                case UserRoles.HeadCoach:
                     var coach = new Coach
                     {
                         Id = user.Id,
@@ -108,13 +149,15 @@ namespace Gym_API.Services
                         GenderId = model.GenderId,
                         PhoneNumber = model.PhoneNumber,
                         StatusId = model.StatusId,
-                        SpecializationId = model.SpecializationId
+                        SpecializationId = model.SpecializationId,
+                        WorkingHours = (int)model.WorkingHours,
                     };
 
                     user.Coach = coach;
-                    await this._userManager.AddToRoleAsync(user, UserRoles.Coach);
+                    await this._userManager.AddToRoleAsync(user, role.Name);
                     break;
                 case UserRoles.Supervisor:
+                case UserRoles.SeniorSupervisor:
                     var supervisor = new Supervisor
                     {
                         Id = user.Id,
@@ -128,30 +171,15 @@ namespace Gym_API.Services
 
                     user.Supervisor = supervisor;
 
-                    await this._userManager.AddToRoleAsync(user, UserRoles.Supervisor);
-                    break;
-                default:
-                    var customer = new Customer
-                    {
-                        Id = user.Id,
-                        Fullname = model.Fullname,
-                        DateOfBirth = model.DateOfBirth,
-                        Email = model.Email,
-                        GenderId = model.GenderId,
-                        PhoneNumber = model.PhoneNumber,
-                    };
-
-                    user.Customer = customer;
-                    await this._userManager.AddToRoleAsync(user, UserRoles.Customer);
+                    await this._userManager.AddToRoleAsync(user, role.Name);
                     break;
             }
-
-            return new Response { Status = "Success", Message = "User Created Successfully" };
+            return new Response { Status = "Success", Message = "Stuff Created Successfully" };
         }
 
-        public async Task<Response> RegisterAdmin(AdminRegisterDto model)
+        public async Task<Response> RegisterSeniorSupervisor(RegisterStuffDto model)
         {
-            var userExist = await this._userManager.FindByNameAsync(model.Username);
+            var userExist = await GetUserByUsernameAsync(model.Username);
 
             if (userExist != null)
             {
@@ -164,17 +192,27 @@ namespace Gym_API.Services
                 UserName = model.Username,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 PasswordHash = BCryptNet.HashPassword(model.Password),
-                IsAdmin = true
+                IsStuff = true,
+                IsCustomer = false
             };
 
             _db.Users.Add(user);
             _db.SaveChanges();
 
-            if (!await this._roleManager.RoleExistsAsync(UserRoles.Admin))
-                await this._roleManager.CreateAsync(new Role(UserRoles.Admin));
+            var supervisor = new Supervisor
+            {
+                Id = user.Id,
+                Fullname = model.Fullname,
+                DateOfBirth = model.DateOfBirth,
+                Email = model.Email,
+                GenderId = model.GenderId,
+                PhoneNumber = model.PhoneNumber,
+                StatusId = model.StatusId,
+            };
 
-            if (await this._roleManager.RoleExistsAsync(UserRoles.Admin))
-                await this._userManager.AddToRoleAsync(user, UserRoles.Admin);
+            user.Supervisor = supervisor;
+
+            await this._userManager.AddToRoleAsync(user, UserRoles.SeniorSupervisor);
 
             return new Response { Status = "Success", Message = "Admin Created Successfully" };
         }
@@ -213,10 +251,23 @@ namespace Gym_API.Services
 
             var userInfo = await this._userService.GetUserInfo(user.Id);
 
-            return new ResLoginDto {
+            return new ResLoginDto
+            {
                 user = userInfo,
                 token = new JwtSecurityTokenHandler().WriteToken(token)
             };
+        }
+
+        protected async Task<User> GetUserByUsernameAsync(string username)
+        {
+            if (username.Contains(" "))
+            {
+                throw new HttpRequestException("Username could not contains spaces", null, HttpStatusCode.BadRequest);
+            }
+
+            var user = await this._userManager.FindByNameAsync(username);
+
+            return user;
         }
     }
 }
