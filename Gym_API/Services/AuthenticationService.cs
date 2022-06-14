@@ -38,37 +38,6 @@ namespace Gym_API.Services
             _db = db;
         }
 
-        public async Task<Response> UpdateUserRoles(string userId, IEnumerable<string> roleNames)
-        {
-            var userExist = await this._userManager.FindByIdAsync(userId);
-
-            if (userExist == null)
-            {
-                throw new HttpRequestException($"User Id {userId}", null, HttpStatusCode.NotFound);
-            }
-
-            var userRoles = await this._userManager.GetRolesAsync(userExist);
-
-            await this._userManager.RemoveFromRolesAsync(userExist, userRoles);
-            await this._userManager.AddToRolesAsync(userExist, roleNames);
-
-            return new Response { Message = $"Update user role successfully", Status = "Success" };
-        }
-
-        public async Task<Response> RemoveUserRoles(string userId, IEnumerable<string> roleNames)
-        {
-            var userExist = await this._userManager.FindByIdAsync(userId);
-
-            if (userExist == null)
-            {
-                throw new HttpRequestException($"User Id {userId}", null, HttpStatusCode.NotFound);
-            }
-
-            await this._userManager.RemoveFromRolesAsync(userExist, roleNames);
-
-            return new Response { Message = $"Remove roles from user {userExist.UserName} successfully", Status = "Success" };
-        }
-
         public async Task<Response> RegisterCustomer(RegisterCustomerDto model)
         {
             var userExist = await GetUserByUsernameAsync(model.Username);
@@ -103,7 +72,7 @@ namespace Gym_API.Services
 
             await this._userManager.AddToRoleAsync(user, UserRoles.Customer);
 
-            return new Response { Status = "Success", Message = "User Created Successfully" };
+            return new Response { Status = "Success", Message = "Customer Created Successfully" };
         }
 
         public async Task<Response> RegisterStuff(RegisterStuffDto model)
@@ -214,7 +183,7 @@ namespace Gym_API.Services
 
             await this._userManager.AddToRoleAsync(user, UserRoles.SeniorSupervisor);
 
-            return new Response { Status = "Success", Message = "Admin Created Successfully" };
+            return new Response { Status = "Success", Message = "Senior Supervisor Created Successfully" };
         }
 
         public async Task<ResLoginDto> Login(LoginDto model)
@@ -249,7 +218,7 @@ namespace Gym_API.Services
                     signingCredentials: new SigningCredentials(authSigninKey, SecurityAlgorithms.HmacSha256)
                 );
 
-            var userInfo = await this._userService.GetUserInfo(user.Id);
+            var userInfo = await this._userService.GetUserInfoAsync(user.Id);
 
             return new ResLoginDto
             {

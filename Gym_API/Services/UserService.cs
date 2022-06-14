@@ -18,10 +18,10 @@ namespace Gym_API.Services
             ApplicationDbContext db,
             UserManager<User> userManager,
             RoleManager<Role> roleManager
-            ): base(db,userManager,roleManager)
-        {}
+            ) : base(db, userManager, roleManager)
+        { }
 
-        public override async Task<dynamic> GetUserInfo(string Id)
+        public override async Task<dynamic> GetUserInfoAsync(string Id)
         {
             var user = await this.GetUserAsync(Id);
 
@@ -56,25 +56,47 @@ namespace Gym_API.Services
             return await this.UpdateCustomerInfo(user.CustomerId, data);
         }
 
-        public override async Task<List<dynamic>> GetUserInfos(string type)
+        public override async Task<List<dynamic>> GetUserInfos(UserInfoQuery query)
         {
             List<dynamic> userInfos = new List<dynamic>();
 
-            if(type.ToLower() == "customer")
+            if (query.type.ToLower() == "customer")
             {
                 foreach (var user in this.GetCustomers())
                 {
-                    var userInfo = await GetUserInfo(user.Id);
+                    var userInfo = await GetUserInfoAsync(user.Id);
                     userInfos.Add(userInfo);
                 }
-            }else if (type.ToLower() == "stuff")
+            }
+            else if (query.type.ToLower() == "stuff")
             {
-                foreach (var user in this.GetStuffs())
+
+                List<User> users = new List<User>();
+
+
+                switch (query.role)
                 {
-                    var userInfo = await GetUserInfo(user.Id);
+                    case "coach":
+                        users.AddRange(await this.GetCoachs());
+                        break;
+                    case "supervisor":
+                        var seniorSupervisors = await this.GetSeniorSupervisors();
+                        var supervisors = await this.GetSupervisors();
+
+                        users.AddRange(seniorSupervisors);
+                        users.AddRange(supervisors);
+                        break;
+                    default:
+                        users.AddRange(this.GetStuffs());
+                        break;
+                }
+
+                foreach (var user in users)
+                {
+                    var userInfo = await GetUserInfoAsync(user.Id);
                     userInfos.Add(userInfo);
                 }
-            }          
+            }
             return userInfos;
         }
 
@@ -82,6 +104,38 @@ namespace Gym_API.Services
         {
             var user = await this.GetUserAsync(Id);
             return await this.GetUserRoles(user);
+        }
+
+        public override async Task<Response> UpdateUserRoles(string userId, IEnumerable<string> roleNames)
+        {
+            var userExist = await this._userManager.FindByIdAsync(userId);
+
+            if (userExist == null)
+            {
+                throw new HttpRequestException($"User Id {userId}", null, HttpStatusCode.NotFound);
+            }
+
+            var userRoles = await this._userManager.GetRolesAsync(userExist);
+
+            await this._userManager.RemoveFromRolesAsync(userExist, userRoles);
+
+            await this._userManager.AddToRolesAsync(userExist, roleNames);
+
+            return new Response { Message = $"Update user role successfully", Status = "Success" };
+        }
+
+        public override async Task<Response> RemoveUserRoles(string userId, IEnumerable<string> roleNames)
+        {
+            var userExist = await this._userManager.FindByIdAsync(userId);
+
+            if (userExist == null)
+            {
+                throw new HttpRequestException($"User Id {userId}", null, HttpStatusCode.NotFound);
+            }
+
+            await this._userManager.RemoveFromRolesAsync(userExist, roleNames);
+
+            return new Response { Message = $"Remove roles from user {userExist.UserName} successfully", Status = "Success" };
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Gym_API.Dto;
 using Gym_API.Services.Interfaces;
+using Gym_API.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Gym_API.Controllers
 {
     [Authorize]
+    [Authorize(Roles = UserRoles.SeniorSupervisor)]
     [Route("api/{controller}")]
     [ApiController]
     public class UserController : Controller
@@ -24,16 +26,16 @@ namespace Gym_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserInfos(string type)
+        public async Task<IActionResult> GetUserInfos([FromQuery] UserInfoQuery query)
         {
-            return Ok(await _userService.GetUserInfos(type));
+            return Ok(await _userService.GetUserInfos(query));
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetUserInfo(string Id = "customer")
+        public async Task<IActionResult> GetUserInfo(string Id)
         {
-            return Ok(await _userService.GetUserInfo(Id));
+            return Ok(await _userService.GetUserInfoAsync(Id));
         }
 
         [HttpPut]
@@ -48,6 +50,20 @@ namespace Gym_API.Controllers
         public async Task<IActionResult> GetUserRoles(string Id)
         {
             return Ok(await _userService.GetUserRoles(Id));
+        }
+
+        [HttpPut]
+        [Route("UpdateRoles/{userId}")]
+        public async Task<IActionResult> UpdateUserRoles(string userId, [FromBody] IEnumerable<string> roleNames)
+        {
+            return Ok(await this._userService.UpdateUserRoles(userId, roleNames));
+        }
+
+        [HttpPut]
+        [Route("RemoveRoles/{userId}")]
+        public async Task<IActionResult> RemoveUserRoles(string userId, [FromBody] IEnumerable<string> roleNames)
+        {
+            return Ok(await this._userService.RemoveUserRoles(userId, roleNames));
         }
     }
 }

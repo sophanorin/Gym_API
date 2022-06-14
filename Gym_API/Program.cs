@@ -29,10 +29,12 @@ builder.Services.AddCors((options) =>
 // Dependency Injection
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<ISpecializationService, SpecializationService>();
+builder.Services.AddTransient<IAppointmentService, AppointmentService>();
 builder.Services.AddTransient<IStatusService, StatusService>();
 builder.Services.AddTransient<IGenderService, GenderService>();
 builder.Services.AddTransient<IRoleService, RoleService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IGroupService, GroupService>();
 
 // Add services to the container.
 builder.Services.AddControllers();

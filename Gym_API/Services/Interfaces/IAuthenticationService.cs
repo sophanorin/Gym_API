@@ -8,9 +8,6 @@ namespace Gym_API.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        public Task<Response> RemoveUserRoles(string userId, IEnumerable<string> roleNames);
-        public Task<Response> UpdateUserRoles(string userId, IEnumerable<string> roleNames);
-
         public Task<Response> RegisterCustomer(RegisterCustomerDto model);
         public Task<Response> RegisterStuff(RegisterStuffDto model);
         public Task<Response> RegisterSeniorSupervisor(RegisterStuffDto model);

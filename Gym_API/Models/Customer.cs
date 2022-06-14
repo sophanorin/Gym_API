@@ -6,9 +6,7 @@ namespace Gym_API.Models
 {
 	public class Customer: Person
 	{
-		public Customer()
-		{
-		}
-	}
+        public virtual ICollection<Group> Groups { get; set; }
+    }
 }
 

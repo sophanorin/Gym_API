@@ -27,9 +27,13 @@ namespace Gym_API.Services.Abstracts
         }
 
         public abstract Task<IList<RoleDto>> GetUserRoles(string Id);
-		public abstract Task<dynamic> GetUserInfo(string Id);
-		public abstract Task<List<dynamic>> GetUserInfos(string type);
-		public abstract Task<Response> UpdateUserInfo(string coachId, UserInfoDto data);
+		public abstract Task<dynamic> GetUserInfoAsync(string Id);
+
+		public abstract Task<List<dynamic>> GetUserInfos(UserInfoQuery query);
+        public abstract Task<Response> RemoveUserRoles(string userId, IEnumerable<string> roleNames);
+        public abstract Task<Response> UpdateUserRoles(string userId, IEnumerable<string> roleNames);
+
+        public abstract Task<Response> UpdateUserInfo(string coachId, UserInfoDto data);
 
         protected async Task<Response> UpdateCoachInfo(string coachId, UserInfoDto data)
         {
@@ -127,6 +131,8 @@ namespace Gym_API.Services.Abstracts
                         Specialization = specialization,
                     }).First();
 
+            var roles = await this._userManager.GetRolesAsync(user);
+
             return new
             {
                 Id = _coach.Id,
@@ -138,7 +144,7 @@ namespace Gym_API.Services.Abstracts
                 WorkingHours = _coach.WorkingHours,
                 Status = _coach.Status,
                 Specialization = _coach.Specialization,
-                Roles = await this.GetUserRoles(user)
+                Roles = roles
             };
         }
 
@@ -167,7 +173,6 @@ namespace Gym_API.Services.Abstracts
                 PhoneNumber = _customer.PhoneNumber,
                 Email = _customer.Email,
                 Gender = _customer.Gender,
-                Roles = await this.GetUserRoles(user)
             };
 
         }
@@ -200,7 +205,6 @@ namespace Gym_API.Services.Abstracts
                 Email = _supervisor.Email,
                 Status = _supervisor.Status,
                 Gender = _supervisor.Gender,
-                Roles = await this.GetUserRoles(user)
             };
         }
 
@@ -232,6 +236,21 @@ namespace Gym_API.Services.Abstracts
         protected IList<User> GetStuffs()
         {
             return this._userManager.Users.Where(user => user.IsStuff).ToList();
+        }
+
+        protected async Task<IList<User>> GetCoachs()
+        {
+            return await this._userManager.GetUsersInRoleAsync(UserRoles.Coach);
+        }
+
+        protected async Task<IList<User>> GetSupervisors()
+        {
+            return await this._userManager.GetUsersInRoleAsync(UserRoles.Supervisor);
+        }
+
+        protected async Task<IList<User>> GetSeniorSupervisors()
+        {
+            return await this._userManager.GetUsersInRoleAsync(UserRoles.SeniorSupervisor);
         }
     }
 }

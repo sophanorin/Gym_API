@@ -12,6 +12,7 @@ using Gym_API.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,6 +39,7 @@ namespace Gym_API.Controllers
             return Ok(await this._authenticationService.RegisterCustomer(body));
         }
 
+        [Authorize(Roles = UserRoles.SeniorSupervisor)]
         [HttpPost]
         [Route("RegisterStuff")]
         public async Task<IActionResult> RegisterStuff([FromBody] RegisterStuffDto body)
@@ -57,20 +59,6 @@ namespace Gym_API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto body)
         {
             return Ok(await this._authenticationService.Login(body));
-        }
-
-        [HttpPut]
-        [Route("UpdateRoles/{userId}")]
-        public async Task<IActionResult> UpdateUserRoles(string userId, [FromBody] IEnumerable<string> roleNames)
-        {
-            return Ok(await this._authenticationService.UpdateUserRoles(userId, roleNames));
-        }
-
-        [HttpPut]
-        [Route("RemoveRoles/{userId}")]
-        public async Task<IActionResult> RemoveUserRoles(string userId, [FromBody] IEnumerable<string> roleNames)
-        {
-            return Ok(await this._authenticationService.RemoveUserRoles(userId, roleNames));
         }
     }
 }

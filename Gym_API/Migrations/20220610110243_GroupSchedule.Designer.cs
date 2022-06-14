@@ -3,6 +3,7 @@ using System;
 using Gym_API.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,62 +11,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Gym_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220610110243_GroupSchedule")]
+    partial class GroupSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.5");
-
-            modelBuilder.Entity("CustomerGroup", b =>
-                {
-                    b.Property<string>("CustomersId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GroupsId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("CustomersId", "GroupsId");
-
-                    b.HasIndex("GroupsId");
-
-                    b.ToTable("CustomerGroup");
-                });
-
-            modelBuilder.Entity("Gym_API.Models.Appointment", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CoachId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CoachId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.ToTable("Appointment", (string)null);
-                });
 
             modelBuilder.Entity("Gym_API.Models.Coach", b =>
                 {
@@ -159,29 +111,6 @@ namespace Gym_API.Migrations
                     b.ToTable("Genders", (string)null);
                 });
 
-            modelBuilder.Entity("Gym_API.Models.Group", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TrainerId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TrainerId");
-
-                    b.ToTable("Group", (string)null);
-                });
-
             modelBuilder.Entity("Gym_API.Models.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -206,35 +135,6 @@ namespace Gym_API.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Gym_API.Models.Schedule", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GroupId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.ToTable("Schedule", (string)null);
                 });
 
             modelBuilder.Entity("Gym_API.Models.Specialization", b =>
@@ -503,40 +403,6 @@ namespace Gym_API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CustomerGroup", b =>
-                {
-                    b.HasOne("Gym_API.Models.Customer", null)
-                        .WithMany()
-                        .HasForeignKey("CustomersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Gym_API.Models.Group", null)
-                        .WithMany()
-                        .HasForeignKey("GroupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Gym_API.Models.Appointment", b =>
-                {
-                    b.HasOne("Gym_API.Models.Coach", "Coach")
-                        .WithMany()
-                        .HasForeignKey("CoachId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Gym_API.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Coach");
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("Gym_API.Models.Coach", b =>
                 {
                     b.HasOne("Gym_API.Models.Gender", "Gender")
@@ -569,26 +435,6 @@ namespace Gym_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Gender");
-                });
-
-            modelBuilder.Entity("Gym_API.Models.Group", b =>
-                {
-                    b.HasOne("Gym_API.Models.Coach", "Trainer")
-                        .WithMany("Groups")
-                        .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Trainer");
-                });
-
-            modelBuilder.Entity("Gym_API.Models.Schedule", b =>
-                {
-                    b.HasOne("Gym_API.Models.Group", "Group")
-                        .WithMany("Schedules")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("Gym_API.Models.Supervisor", b =>
@@ -690,8 +536,6 @@ namespace Gym_API.Migrations
 
             modelBuilder.Entity("Gym_API.Models.Coach", b =>
                 {
-                    b.Navigation("Groups");
-
                     b.Navigation("UserCredential")
                         .IsRequired();
                 });
@@ -700,11 +544,6 @@ namespace Gym_API.Migrations
                 {
                     b.Navigation("UserCredential")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Gym_API.Models.Group", b =>
-                {
-                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("Gym_API.Models.Supervisor", b =>

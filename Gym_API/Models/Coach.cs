@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using Gym_API.Models.Base;
 
 namespace Gym_API.Models
@@ -15,7 +16,7 @@ namespace Gym_API.Models
 
         public virtual Status? Status { get; set; }
         public virtual Specialization? Specialization { get; set; }
-
+        public virtual ICollection<Group> Groups { get; set; }
     }
 }
 
