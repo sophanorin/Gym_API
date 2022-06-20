@@ -17,7 +17,7 @@ namespace Gym_API.Dto
 
         public string? StatusId { get; set; }
 
-        public string? SpecializationId { get; set; }
+        public ICollection<string>? SpecializationIds { get; set; }
     }
 }
 

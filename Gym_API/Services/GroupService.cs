@@ -96,7 +96,11 @@ namespace Gym_API.Services
                         DateOfBirth = g.Trainer.DateOfBirth,
                         Email = g.Trainer.Email,
                         Gender = g.Trainer.Gender,
-                        Specialization = g.Trainer.Specialization,
+                        Specialization = g.Trainer.Specializations.Select(specialization => new
+                        {
+                            Id = specialization.Id,
+                            Name = specialization.Name
+                        }),
                         Status = g.Trainer.Status,
                     },
                     Schedules = g.Schedules.Select(s => s).ToList()
@@ -196,7 +200,11 @@ namespace Gym_API.Services
                        DateOfBirth = g.Trainer.DateOfBirth,
                        Email = g.Trainer.Email,
                        Gender = g.Trainer.Gender,
-                       Specialization = g.Trainer.Specialization,
+                       Specialization = g.Trainer.Specializations.Select(specializatin => new
+                       {
+                           Id = specializatin.Id,
+                           Name = specializatin.Name
+                       }),
                        Status = g.Trainer.Status,
                    },
                    Schedules = g.Schedules.Select(s => s).ToList()

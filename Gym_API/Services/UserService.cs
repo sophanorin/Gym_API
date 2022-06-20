@@ -73,7 +73,6 @@ namespace Gym_API.Services
 
                 List<User> users = new List<User>();
 
-
                 switch (query.role)
                 {
                     case "coach":
@@ -110,6 +109,11 @@ namespace Gym_API.Services
         {
             var userExist = await this._userManager.FindByIdAsync(userId);
 
+            if(roleNames.Count() == 0)
+            {
+                throw new HttpRequestException($"User must be has at least one role", null, HttpStatusCode.NotFound);
+            }
+
             if (userExist == null)
             {
                 throw new HttpRequestException($"User Id {userId}", null, HttpStatusCode.NotFound);
@@ -117,9 +121,73 @@ namespace Gym_API.Services
 
             var userRoles = await this._userManager.GetRolesAsync(userExist);
 
-            await this._userManager.RemoveFromRolesAsync(userExist, userRoles);
+            foreach (string userRole in userRoles)
+            {
+                if (!roleNames.Contains(userRole))
+                {
+                    await this._userManager.RemoveFromRoleAsync(userExist, userRole);
 
-            await this._userManager.AddToRolesAsync(userExist, roleNames);
+                    if (userRole.Contains("Coach"))
+                    {
+                        var coach = _db.Coaches.Find(userExist.Id);
+                        if(coach != null)
+                            _db.Coaches.Remove(coach);
+
+                    }
+                    else if (userRole.Contains("Supervisor"))
+                    {
+                        var supervisor = _db.Supervisors.Find(userExist.Id);
+                        if(supervisor != null)
+                            _db.Supervisors.Remove(supervisor);
+                    }
+                }
+            }
+
+            var userInfo = await GetUserInfoAsync(userExist.Id);
+
+            foreach (string newRoleName in roleNames)
+            {
+                if(!userRoles.Contains(newRoleName))
+                {
+                    await this._userManager.AddToRoleAsync(userExist, newRoleName);
+
+                    if (newRoleName.Contains("Coach"))
+                    {
+                        Coach coach = new Coach
+                        {
+                            Id = userInfo.Id,
+                            Fullname = userInfo.Fullname,
+                            DateOfBirth = Convert.ToDateTime(userInfo.DateOfBirth),
+                            PhoneNumber = userInfo.PhoneNumber,
+                            Email = userInfo.Email,
+                            Gender = userInfo.Gender,
+                            WorkingHours = 8,
+                            Status = userInfo.Status,
+                            UserCredential = userExist
+                        };
+
+                        _db.Coaches.Add(coach);
+                    }
+                    else if (newRoleName.Contains("Supervisor"))
+                    {
+                        Supervisor supervisor = new Supervisor
+                        {
+                            Id = userInfo.Id,
+                            Fullname = userInfo.Fullname,
+                            DateOfBirth = Convert.ToDateTime(userInfo.DateOfBirth),
+                            PhoneNumber = userInfo.PhoneNumber,
+                            Email = userInfo.Email,
+                            Gender = userInfo.Gender,
+                            Status = userInfo.Status,
+                            UserCredential = userExist
+                        };
+                        _db.Supervisors.Add(supervisor);
+                    }
+                    
+                }
+            }
+
+            _db.SaveChanges();
 
             return new Response { Message = $"Update user role successfully", Status = "Success" };
         }

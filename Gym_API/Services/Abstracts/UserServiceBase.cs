@@ -37,7 +37,23 @@ namespace Gym_API.Services.Abstracts
 
         protected async Task<Response> UpdateCoachInfo(string coachId, UserInfoDto data)
         {
-            Coach? coach = await _db.Coaches.FindAsync(coachId);
+            Coach coach = _db.Coaches
+                .Where(coach => coach.Id == coachId)
+                .Select(coach => new Coach
+                {
+                    Id = coach.Id,
+                    Fullname = coach.Fullname,
+                    Email = coach.Email,
+                    DateOfBirth = coach.DateOfBirth,
+                    PhoneNumber = coach.PhoneNumber,
+                    WorkingHours = coach.WorkingHours,
+                    Gender = coach.Gender,
+                    Status = coach.Status,
+                    Specializations = coach.Specializations,
+                })
+                .First();
+
+            _db.Coaches.Attach(coach);
 
             if (coach == null)
             {
@@ -49,17 +65,22 @@ namespace Gym_API.Services.Abstracts
             coach.DateOfBirth = data.DateOfBirth;
             coach.PhoneNumber = data.PhoneNumber;
             coach.WorkingHours = (int)data.WorkingHours;
+            coach.Gender = _db.Genders.Find(data.GenderId);
+            coach.Status = _db.Statuses.Find(data.StatusId);
+                
+            coach.Specializations.Clear();
 
-            if (coach.GenderId != data.GenderId)
-                coach.Gender = _db.Genders.Find(data.GenderId);
+            if (data.SpecializationIds.Count > 0)
+            {
+                var specializations = _db.Specializations.Where(coach => data.SpecializationIds.Contains(coach.Id));
 
-            if (coach.StatusId != data.StatusId)
-                coach.Status = _db.Statuses.Find(data.StatusId);
+                foreach (Specialization specialization in specializations)
+                {
+                    coach.Specializations.Add(specialization);
+                }
+            }
 
-            if (coach.SpecializationId != data.SpecializationId)
-                coach.Specialization = _db.Specializations.Find(data.SpecializationId);
-
-            await _db.SaveChangesAsync().ConfigureAwait(false);
+            await _db.SaveChangesAsync();
 
             return new Response { Message = "Coach update successfully", Status = "Success" };
         }
@@ -112,40 +133,27 @@ namespace Gym_API.Services.Abstracts
 
         protected async Task<dynamic> GetCoachInfo(User user)
         {
-            var _coach =
-                   (from coach in _db.Coaches
-                    join gender in _db.Genders on coach.GenderId equals gender.Id
-                    join status in _db.Statuses on coach.StatusId equals status.Id
-                    join specialization in _db.Specializations on coach.SpecializationId equals specialization.Id
-                    where coach.Id == user.CoachId
-                    select new
-                    {
-                        Id = coach.Id,
-                        Fullname = coach.Fullname,
-                        DateOfBirth = coach.DateOfBirth,
-                        PhoneNumber = coach.PhoneNumber,
-                        Email = coach.Email,
-                        WorkingHours = coach.WorkingHours,
-                        Gender = gender,
-                        Status = status,
-                        Specialization = specialization,
-                    }).First();
-
             var roles = await this._userManager.GetRolesAsync(user);
 
-            return new
+            var _coach = _db.Coaches.Select(coach => new
             {
-                Id = _coach.Id,
-                Fullname = _coach.Fullname,
-                DateOfBirth = _coach.DateOfBirth,
-                PhoneNumber = _coach.PhoneNumber,
-                Gender = _coach.Gender,
-                Email = _coach.Email,
-                WorkingHours = _coach.WorkingHours,
-                Status = _coach.Status,
-                Specialization = _coach.Specialization,
+                Id = coach.Id,
+                Fullname = coach.Fullname,
+                DateOfBirth = coach.DateOfBirth,
+                PhoneNumber = coach.PhoneNumber,
+                Email = coach.Email,
+                WorkingHours = coach.WorkingHours,
+                Gender = coach.Gender,
+                Status = coach.Status,
+                Specialization = coach.Specializations.Select(specializatin => new
+                {
+                    Id = specializatin.Id,
+                    Name = specializatin.Name
+                }),
                 Roles = roles
-            };
+            }).FirstOrDefault();
+
+            return _coach;
         }
 
         protected async Task<dynamic> GetCustomerInfo(User user)

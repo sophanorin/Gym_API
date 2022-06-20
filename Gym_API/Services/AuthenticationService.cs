@@ -109,6 +109,11 @@ namespace Gym_API.Services
                 case UserRoles.Coach:
                 case UserRoles.SeniorCoach:
                 case UserRoles.HeadCoach:
+
+                    var specializations = _db.Specializations
+                        .Where(specialization => model.SpecializationIds.Contains(specialization.Id))
+                        .ToList();
+
                     var coach = new Coach
                     {
                         Id = user.Id,
@@ -118,7 +123,7 @@ namespace Gym_API.Services
                         GenderId = model.GenderId,
                         PhoneNumber = model.PhoneNumber,
                         StatusId = model.StatusId,
-                        SpecializationId = model.SpecializationId,
+                        Specializations = specializations,
                         WorkingHours = (int)model.WorkingHours,
                     };
 

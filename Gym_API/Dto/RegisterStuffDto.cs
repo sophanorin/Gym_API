@@ -11,6 +11,6 @@ namespace Gym_API.Dto
         public int? WorkingHours { get; set; }
 
         public string? StatusId { get; set; }
-        public string? SpecializationId { get; set; }
+        public ICollection<string> SpecializationIds { get; set; }
     }
 }

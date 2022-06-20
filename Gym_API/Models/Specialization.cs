@@ -6,7 +6,8 @@ namespace Gym_API.Models
 {
 	public class Specialization: BaseModel
 	{
-        
+        public virtual ICollection<Coach> Coaches { get; set; }
+
         public Specialization():base()
         {
         }
