@@ -156,7 +156,8 @@ namespace Gym_API.Services
                         Coach coach = new Coach
                         {
                             Id = userInfo.Id,
-                            Fullname = userInfo.Fullname,
+                            Firstname = userInfo.Firstname,
+                            Lastname = userInfo.Lastname,
                             DateOfBirth = Convert.ToDateTime(userInfo.DateOfBirth),
                             PhoneNumber = userInfo.PhoneNumber,
                             Email = userInfo.Email,
@@ -173,7 +174,8 @@ namespace Gym_API.Services
                         Supervisor supervisor = new Supervisor
                         {
                             Id = userInfo.Id,
-                            Fullname = userInfo.Fullname,
+                            Firstname = userInfo.Firstname,
+                            Lastname = userInfo.Lastname,
                             DateOfBirth = Convert.ToDateTime(userInfo.DateOfBirth),
                             PhoneNumber = userInfo.PhoneNumber,
                             Email = userInfo.Email,

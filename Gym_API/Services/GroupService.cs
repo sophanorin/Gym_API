@@ -19,12 +19,25 @@ namespace Gym_API.Services
 
         public Response AddGroup(GroupDto body)
         {
+            if(body.OpenDate > body.CloseDate)
+            {
+                throw new HttpRequestException("Invalid OpenDate & CloseDate", null, HttpStatusCode.BadRequest);
+            }
+
             var group = new Group
             {
                 Name = body.Name,
                 Description = body.Description,
-                TrainerId = body.TrainerId
+                TrainerId = body.TrainerId,
+                Limitation = body.Limitation,
+                OpenDate = body.OpenDate,
+                CloseDate = body.CloseDate
             };
+
+            if(body.CustomerIds.Count > group.Limitation)
+            {
+                throw new HttpRequestException("Customers or members can't over the limitation", null, HttpStatusCode.BadRequest);
+            }
 
             if (body.CustomerIds.Count > 0)
             {
@@ -79,10 +92,13 @@ namespace Gym_API.Services
                     Id = g.Id,
                     Name = g.Name,
                     Description = g.Description,
+                    Limitation = g.Limitation,
                     Customers = g.Customers.Select(customer => new
                     {
                         Id = customer.Id,
                         Fullname = customer.Fullname,
+                        Firstname = customer.Firstname,
+                        Lastname = customer.Lastname,
                         PhoneNumber = customer.PhoneNumber,
                         DateOfBirth = customer.DateOfBirth,
                         Email = customer.Email,
@@ -92,6 +108,8 @@ namespace Gym_API.Services
                     {
                         Id = g.Trainer.Id,
                         Fullname = g.Trainer.Fullname,
+                        Firstname = g.Trainer.Firstname,
+                        Lastname = g.Trainer.Lastname,
                         PhoneNumber = g.Trainer.PhoneNumber,
                         DateOfBirth = g.Trainer.DateOfBirth,
                         Email = g.Trainer.Email,
@@ -103,7 +121,14 @@ namespace Gym_API.Services
                         }),
                         Status = g.Trainer.Status,
                     },
-                    Schedules = g.Schedules.Select(s => s).ToList()
+                    Schedules = g.Schedules.Select(s => new
+                    {
+                        Id = s.Id,
+                        Title = s.Title,
+                        Description = s.Description,
+                        StartDate = s.StartDate,
+                        EndDate = s.EndDate
+                    }).ToList()
                 }).FirstOrDefault();
 
             if (group == null)
@@ -123,16 +148,28 @@ namespace Gym_API.Services
                     Id = g.Id,
                     Name = g.Name,
                     Description = g.Description,
+                    Limitation = g.Limitation,
+                    OpenDate = g.OpenDate,
+                    CloseDate = g.CloseDate,
                     Customers = g.Customers.Select(customer => new
                     {
                         Id = customer.Id,
                         Fullname = customer.Fullname,
+                        Firstname = customer.Firstname,
+                        Lastname = customer.Lastname,
                         PhoneNumber = customer.PhoneNumber,
                         DateOfBirth = customer.DateOfBirth,
                         Email = customer.Email,
                         Gender = customer.Gender,
                     }).ToList(),
-                    Schedules = g.Schedules.Select(s => s).ToList()
+                    Schedules = g.Schedules.Select(s => new
+                    {
+                        Id = s.Id,
+                        Title = s.Title,
+                        Description = s.Description,
+                        StartDate = s.StartDate,
+                        EndDate = s.EndDate
+                    }).ToList()
                 }).ToList();
         }
 
@@ -183,10 +220,15 @@ namespace Gym_API.Services
                    Id = g.Id,
                    Name = g.Name,
                    Description = g.Description,
+                   Limitation = g.Limitation,
+                   OpenDate = g.OpenDate,
+                   CloseDate = g.CloseDate,
                    Customers = g.Customers.Select(customer => new
                    {
                        Id = customer.Id,
                        Fullname = customer.Fullname,
+                       Firstname = customer.Firstname,
+                       Lastname = customer.Lastname,
                        PhoneNumber = customer.PhoneNumber,
                        DateOfBirth = customer.DateOfBirth,
                        Email = customer.Email,
@@ -196,6 +238,8 @@ namespace Gym_API.Services
                    {
                        Id = g.Trainer.Id,
                        Fullname = g.Trainer.Fullname,
+                       Firstname = g.Trainer.Firstname,
+                       Lastname = g.Trainer.Lastname,
                        PhoneNumber = g.Trainer.PhoneNumber,
                        DateOfBirth = g.Trainer.DateOfBirth,
                        Email = g.Trainer.Email,
@@ -207,7 +251,14 @@ namespace Gym_API.Services
                        }),
                        Status = g.Trainer.Status,
                    },
-                   Schedules = g.Schedules.Select(s => s).ToList()
+                   Schedules = g.Schedules.Select(s => new
+                   {
+                       Id = s.Id,
+                       Title = s.Title,
+                       Description = s.Description,
+                       StartDate = s.StartDate,
+                       EndDate = s.EndDate
+                   }).ToList()
                })
                .ToList();
         }
@@ -257,6 +308,99 @@ namespace Gym_API.Services
             _db.SaveChanges();
 
             return new Response { Message = $"Schedule Id {Id} deleted", Status = "Success" };
+        }
+
+        public Response AddCustomerToGroup(string customerId, string groupId)
+        {
+            var group = _db.Groups.Where(g => g.Id == groupId).Select(g => new Group
+            {
+                Id = g.Id,
+                Limitation = g.Limitation,
+                CloseDate = g.CloseDate,
+                Customers = g.Customers
+            }).First();
+
+
+            if (group == null) {
+                throw new HttpRequestException($"Group Id {groupId} not found", null, HttpStatusCode.NotFound);
+            }
+
+            if(group.CloseDate < DateTime.Now)
+            {
+                throw new HttpRequestException("The group has been closed", null, HttpStatusCode.BadRequest);
+            }
+
+            if(group.Customers.Count >= group.Limitation) {
+                throw new HttpRequestException("Customers or members can't over the limitation", null, HttpStatusCode.BadRequest);
+            }
+
+            _db.Groups.Attach(group);
+
+            var customer = _db.Customers.Find(customerId);
+
+            group.Customers.Add(customer);
+            _db.SaveChanges();
+
+            return new Response { Message = $"Add customer id {customerId} to group successfully", Status = "Success" };
+        }
+
+        public Response RemoveCustomerFromGroup(string customerId, string groupId)
+        {
+            var group = _db.Groups.Where(g => g.Id == groupId).Select(g => new Group
+            {
+                Id = g.Id,
+                Customers = g.Customers
+            }).First();
+
+            if (group == null)
+            {
+                throw new HttpRequestException($"Group Id {groupId} not found", null, HttpStatusCode.NotFound);
+            }
+
+            _db.Groups.Attach(group);
+
+            var customer = _db.Customers.Find(customerId);
+
+            group.Customers.Remove(customer);
+            _db.SaveChanges();
+
+            return new Response { Message = $"Remove customer id {customerId} from the group successfully", Status = "Success" };
+        }
+
+        public GroupInfoDto UpdateGroupInfo(string groupId,GroupInfoDto data)
+        {
+            var group = _db.Groups.Find(groupId);
+
+            if (group == null)
+            {
+                throw new HttpRequestException($"Group Id {groupId} not found", null, HttpStatusCode.NotFound);
+            }
+
+            group.Name = data.Name;
+            group.Description = data.Description;
+            group.Limitation = data.Limitation;
+            group.OpenDate = data.OpenDate;
+            group.CloseDate = data.CloseDate;
+
+            if(group.TrainerId != data.TrainerId && data.TrainerId != null)
+            {
+                var trainer = _db.Coaches.Find(data.TrainerId);
+
+                group.Trainer = trainer;
+            }
+
+            _db.SaveChanges();
+
+            return new GroupInfoDto
+            {
+                Id = group.Id,
+                Name = group.Name,
+                Description = group.Description,
+                Limitation = group.Limitation,
+                OpenDate = group.OpenDate,
+                CloseDate = group.CloseDate,
+                Trainer = group.Trainer,
+            };
         }
     }
 }

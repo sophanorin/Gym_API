@@ -45,7 +45,28 @@ namespace Gym_API.Controllers
 			return Ok(_groupService.AddGroup(body));
 		}
 
-		[HttpGet]
+        [HttpPut]
+        [Route("{groupId}")]
+        public IActionResult UpdateGroupInfo(string groupId, GroupInfoDto body)
+        {
+            return Ok(_groupService.UpdateGroupInfo(groupId, body));
+        }
+
+        [HttpPost]
+        [Route("AddCustomer")]
+        public IActionResult AddCustomerToGroup(CustomerWithGroupDto body)
+        {
+            return Ok(_groupService.AddCustomerToGroup(body.CustomerId, body.GroupId));
+        }
+
+        [HttpDelete]
+        [Route("RemoveCustomer")]
+        public IActionResult RemoveCustomerFromGroup(CustomerWithGroupDto body)
+        {
+            return Ok(_groupService.RemoveCustomerFromGroup(body.CustomerId, body.GroupId));
+        }
+
+        [HttpGet]
 		[Route("Schedule/Trainer/{id}")]
 		public IActionResult GetTrainerScheduleById(string Id)
 		{
@@ -79,6 +100,6 @@ namespace Gym_API.Controllers
 		{
 			return Ok(_groupService.UpdateGroupSchedule(Id,body));
 		}
-	}
+    }
 }
 

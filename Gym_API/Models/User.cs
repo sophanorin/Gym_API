@@ -18,6 +18,9 @@ namespace Gym_API.Models
         public Supervisor? Supervisor { get; set; }
         public Specialization? Specialization { get; set; }
 
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
+
         public User() : base()
         {
         }

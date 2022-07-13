@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace Gym_API.Controllers
 {
     [Authorize]
-    [Authorize(Roles = UserRoles.SeniorSupervisor)]
     [Route("api/{controller}")]
     [ApiController]
     public class UserController : Controller
@@ -38,6 +37,7 @@ namespace Gym_API.Controllers
             return Ok(await _userService.GetUserInfoAsync(Id));
         }
 
+        [Authorize(Roles = UserRoles.SeniorSupervisor)]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateUserInfo(string Id, [FromBody] UserInfoDto body)
@@ -52,6 +52,7 @@ namespace Gym_API.Controllers
             return Ok(await _userService.GetUserRoles(Id));
         }
 
+        [Authorize(Roles = UserRoles.SeniorSupervisor)]
         [HttpPut]
         [Route("UpdateRoles/{userId}")]
         public async Task<IActionResult> UpdateUserRoles(string userId, [FromBody] IEnumerable<string> roleNames)
@@ -59,6 +60,7 @@ namespace Gym_API.Controllers
             return Ok(await this._userService.UpdateUserRoles(userId, roleNames));
         }
 
+        [Authorize(Roles = UserRoles.SeniorSupervisor)]
         [HttpPut]
         [Route("RemoveRoles/{userId}")]
         public async Task<IActionResult> RemoveUserRoles(string userId, [FromBody] IEnumerable<string> roleNames)

@@ -5,8 +5,11 @@ namespace Gym_API.Dto
 {
 	public class RegisterBaseDto
 	{
-        [Required(ErrorMessage = "Fullname is required")]
-        public string Fullname { get; set; }
+        [Required(ErrorMessage = "Firstname is required")]
+        public string Firstname { get; set; }
+
+        [Required(ErrorMessage = "Lastname is required")]
+        public string Lastname { get; set; }
 
         [Required(ErrorMessage = "Phnone Number is required")]
         public string PhoneNumber { get; set; }

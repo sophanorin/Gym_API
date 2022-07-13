@@ -12,6 +12,7 @@ using System.Net;
 using Microsoft.IdentityModel.Tokens;
 using Gym_API.Contexts;
 using BCryptNet = BCrypt.Net.BCrypt;
+using System.Security.Cryptography;
 
 namespace Gym_API.Services
 {
@@ -61,7 +62,8 @@ namespace Gym_API.Services
             var customer = new Customer
             {
                 Id = user.Id,
-                Fullname = model.Fullname,
+                Firstname = model.Firstname,
+                Lastname = model.Lastname,
                 DateOfBirth = model.DateOfBirth,
                 Email = model.Email,
                 GenderId = model.GenderId,
@@ -117,7 +119,8 @@ namespace Gym_API.Services
                     var coach = new Coach
                     {
                         Id = user.Id,
-                        Fullname = model.Fullname,
+                        Firstname = model.Firstname,
+                        Lastname = model.Lastname,
                         DateOfBirth = model.DateOfBirth,
                         Email = model.Email,
                         GenderId = model.GenderId,
@@ -135,7 +138,8 @@ namespace Gym_API.Services
                     var supervisor = new Supervisor
                     {
                         Id = user.Id,
-                        Fullname = model.Fullname,
+                        Firstname = model.Firstname,
+                        Lastname = model.Lastname,
                         DateOfBirth = model.DateOfBirth,
                         Email = model.Email,
                         GenderId = model.GenderId,
@@ -151,7 +155,7 @@ namespace Gym_API.Services
             return new Response { Status = "Success", Message = "Stuff Created Successfully" };
         }
 
-        public async Task<Response> RegisterSeniorSupervisor(RegisterStuffDto model)
+        public async Task<Response> RegisterSeniorSupervisor(RegisterSupervisorDto model)
         {
             var userExist = await GetUserByUsernameAsync(model.Username);
 
@@ -176,7 +180,8 @@ namespace Gym_API.Services
             var supervisor = new Supervisor
             {
                 Id = user.Id,
-                Fullname = model.Fullname,
+                Firstname = model.Firstname,
+                Lastname = model.Lastname,
                 DateOfBirth = model.DateOfBirth,
                 Email = model.Email,
                 GenderId = model.GenderId,
@@ -213,22 +218,24 @@ namespace Gym_API.Services
                 authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
 
-            var authSigninKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._configuration["JWT:SecretKey"]));
+            _ = int.TryParse(_configuration["JWT:RefreshTokenValidityInDays"], out int refreshTokenValidityInDays);
 
-            var token = new JwtSecurityToken(
-                    issuer: this._configuration["JWT:ValidIssuer"],
-                    audience: this._configuration["JWT:ValidAudience"],
-                    claims: authClaims,
-                    expires: DateTime.Now.AddDays(30),
-                    signingCredentials: new SigningCredentials(authSigninKey, SecurityAlgorithms.HmacSha256)
-                );
+            var token = this.CreateToken(authClaims);
+            var refreshToken = this.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(refreshTokenValidityInDays);
+
+            await _userManager.UpdateAsync(user);
 
             var userInfo = await this._userService.GetUserInfoAsync(user.Id);
 
             return new ResLoginDto
             {
-                user = userInfo,
-                token = new JwtSecurityTokenHandler().WriteToken(token)
+                User = userInfo,
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                RefreshToken = refreshToken,
+                Expiration = token.ValidTo
             };
         }
 
@@ -242,6 +249,89 @@ namespace Gym_API.Services
             var user = await this._userManager.FindByNameAsync(username);
 
             return user;
+        }
+
+        public async Task<TokenDto> RefreshToken(TokenDto tokenDto)
+        {
+            if (tokenDto is null)
+            {
+                throw new HttpRequestException("Invalid client request", null, HttpStatusCode.BadRequest);
+            }
+
+            string? accessToken = tokenDto.AccessToken;
+            string? refreshToken = tokenDto.RefreshToken;
+
+            var principal = GetPrincipalFromExpiredToken(accessToken);
+
+            if (principal == null)
+            {
+                throw new HttpRequestException("Invalid access token or refresh token", null, HttpStatusCode.BadRequest);
+            }
+
+            string username = principal.Identity.Name;
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+            {
+                throw new HttpRequestException("Invalid access token or refresh token", null, HttpStatusCode.BadRequest);
+            }
+
+            var newAccessToken = CreateToken(principal.Claims.ToList());
+            var newRefreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            await _userManager.UpdateAsync(user);
+
+            return new TokenDto
+            {
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+                RefreshToken = newRefreshToken
+            };
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
+        public ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidAudience = _configuration["JWT:ValidAudience"],
+                ValidIssuer = _configuration["JWT:ValidIssuer"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]))
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new SecurityTokenException("Invalid token");
+
+            return principal;
+        }
+
+        public JwtSecurityToken CreateToken(List<Claim> authClaims)
+        {
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._configuration["JWT:SecretKey"]));
+
+            _ = int.TryParse(_configuration["JWT:TokenValidityInMinutes"], out int tokenValidityInMinutes);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddMinutes(tokenValidityInMinutes),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+            );
+
+            return token;
         }
     }
 }

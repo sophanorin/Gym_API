@@ -49,7 +49,7 @@ namespace Gym_API.Controllers
 
         [HttpPost]
         [Route("RegisterSeniorSupervisor")]
-        public async Task<IActionResult> RegisterSeniorSupervisor([FromBody] RegisterStuffDto body)
+        public async Task<IActionResult> RegisterSeniorSupervisor([FromBody] RegisterSupervisorDto body)
         {
             return Ok(await this._authenticationService.RegisterSeniorSupervisor(body));
         }
@@ -59,6 +59,13 @@ namespace Gym_API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto body)
         {
             return Ok(await this._authenticationService.Login(body));
+        }
+
+        [HttpPost]
+        [Route("refreshToken")]
+        public async Task<IActionResult> GetRefreshToken(TokenDto tokenDto)
+        {
+            return Ok(await this._authenticationService.RefreshToken(tokenDto));
         }
     }
 }

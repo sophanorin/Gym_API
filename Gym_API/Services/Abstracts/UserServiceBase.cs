@@ -42,7 +42,8 @@ namespace Gym_API.Services.Abstracts
                 .Select(coach => new Coach
                 {
                     Id = coach.Id,
-                    Fullname = coach.Fullname,
+                    Firstname = coach.Firstname,
+                    Lastname = coach.Lastname,
                     Email = coach.Email,
                     DateOfBirth = coach.DateOfBirth,
                     PhoneNumber = coach.PhoneNumber,
@@ -60,7 +61,8 @@ namespace Gym_API.Services.Abstracts
                 throw new HttpRequestException($"Coach Id {coach} not found", null, HttpStatusCode.NotFound);
             }
 
-            coach.Fullname = data.Fullname;
+            coach.Firstname = data.Firstname;
+            coach.Lastname = data.Lastname;
             coach.Email = data.Email;
             coach.DateOfBirth = data.DateOfBirth;
             coach.PhoneNumber = data.PhoneNumber;
@@ -94,7 +96,8 @@ namespace Gym_API.Services.Abstracts
                 throw new HttpRequestException($"Customer Id {customer} not found", null, HttpStatusCode.NotFound);
             }
 
-            customer.Fullname = data.Fullname;
+            customer.Firstname = data.Firstname;
+            customer.Lastname = data.Lastname;
             customer.Email = data.Email;
             customer.DateOfBirth = data.DateOfBirth;
             customer.PhoneNumber = data.PhoneNumber;
@@ -116,7 +119,8 @@ namespace Gym_API.Services.Abstracts
                 throw new HttpRequestException($"Supervisor Id {supervisor} not found", null, HttpStatusCode.NotFound);
             }
 
-            supervisor.Fullname = data.Fullname;
+            supervisor.Firstname = data.Firstname;
+            supervisor.Lastname = data.Lastname;
             supervisor.Email = data.Email;
             supervisor.DateOfBirth = data.DateOfBirth;
             supervisor.PhoneNumber = data.PhoneNumber;
@@ -139,6 +143,8 @@ namespace Gym_API.Services.Abstracts
             {
                 Id = coach.Id,
                 Fullname = coach.Fullname,
+                Firstname = coach.Firstname,
+                Lastname = coach.Lastname,
                 DateOfBirth = coach.DateOfBirth,
                 PhoneNumber = coach.PhoneNumber,
                 Email = coach.Email,
@@ -166,6 +172,8 @@ namespace Gym_API.Services.Abstracts
                      {
                          Id = customer.Id,
                          Fullname = customer.Fullname,
+                         Firstname = customer.Firstname,
+                         Lastname = customer.Lastname,
                          DateOfBirth = customer.DateOfBirth,
                          PhoneNumber = customer.PhoneNumber,
                          Email = customer.Email,
@@ -177,6 +185,8 @@ namespace Gym_API.Services.Abstracts
             {
                 Id = _customer.Id,
                 Fullname = _customer.Fullname,
+                Firstname = _customer.Firstname,
+                Lastname = _customer.Lastname,
                 DateOfBirth = _customer.DateOfBirth,
                 PhoneNumber = _customer.PhoneNumber,
                 Email = _customer.Email,
@@ -196,6 +206,8 @@ namespace Gym_API.Services.Abstracts
                       {
                           Id = supervisor.Id,
                           Fullname = supervisor.Fullname,
+                          Firstname = supervisor.Firstname,
+                          Lastname = supervisor.Lastname,
                           DateOfBirth = supervisor.DateOfBirth,
                           PhoneNumber = supervisor.PhoneNumber,
                           Email = supervisor.Email,
@@ -208,6 +220,8 @@ namespace Gym_API.Services.Abstracts
             {
                 Id = _supervisor.Id,
                 Fullname = _supervisor.Fullname,
+                Firstname = _supervisor.Firstname,
+                Lastname = _supervisor.Lastname,
                 DateOfBirth = _supervisor.DateOfBirth,
                 PhoneNumber = _supervisor.PhoneNumber,
                 Email = _supervisor.Email,

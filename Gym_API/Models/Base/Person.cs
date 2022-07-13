@@ -6,7 +6,16 @@ namespace Gym_API.Models.Base
 	public abstract class Person
 	{
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string Fullname { get; set; }
+
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
+
+        public string Fullname {
+            get {
+                return Firstname + " " + Lastname;
+            }
+        }
+
         public DateTime DateOfBirth { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
