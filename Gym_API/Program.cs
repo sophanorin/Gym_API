@@ -19,7 +19,7 @@ builder.Services.AddCors((options) =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy
+        policy.SetIsOriginAllowed(_ => true)
             .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -63,6 +63,7 @@ builder.Services.AddAuthentication(options =>
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters()
         {
+            ClockSkew = TimeSpan.Zero,
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidAudience = Configuration["JWT:ValidAudience"],
@@ -84,6 +85,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
