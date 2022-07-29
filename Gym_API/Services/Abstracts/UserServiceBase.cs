@@ -164,6 +164,8 @@ namespace Gym_API.Services.Abstracts
 
         protected async Task<dynamic> GetCustomerInfo(User user)
         {
+            var roles = await this._userManager.GetRolesAsync(user);
+
             var _customer =
                     (from customer in _db.Customers
                      join gender in _db.Genders on customer.GenderId equals gender.Id
@@ -191,12 +193,15 @@ namespace Gym_API.Services.Abstracts
                 PhoneNumber = _customer.PhoneNumber,
                 Email = _customer.Email,
                 Gender = _customer.Gender,
+                Roles = roles
             };
 
         }
 
         protected async Task<dynamic> GetSupervisorInfo(User user)
         {
+            var roles = await this._userManager.GetRolesAsync(user);
+
             var _supervisor =
                      (from supervisor in _db.Supervisors
                       join gender in _db.Genders on supervisor.GenderId equals gender.Id
@@ -227,6 +232,7 @@ namespace Gym_API.Services.Abstracts
                 Email = _supervisor.Email,
                 Status = _supervisor.Status,
                 Gender = _supervisor.Gender,
+                Roles = roles
             };
         }
 
