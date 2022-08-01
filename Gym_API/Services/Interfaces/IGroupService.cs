@@ -10,7 +10,7 @@ namespace Gym_API.Services.Interfaces
 		public dynamic GetGroups();
 		public dynamic GetGroupById(string Id);
 		public Response DeleteGroup(string Id);
-		public GroupInfoDto UpdateGroupInfo(string groupId, GroupInfoDto data);
+		public Task<dynamic> UpdateGroupInfo(string groupId, GroupInfoDto data);
 		public Response AddGroup(GroupDto body);
 		public Response AddCustomerToGroup(string customerId,string groupId);
         public Response RemoveCustomerFromGroup(string customerId, string groupId);

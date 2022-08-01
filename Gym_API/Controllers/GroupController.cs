@@ -47,9 +47,9 @@ namespace Gym_API.Controllers
 
         [HttpPut]
         [Route("{groupId}")]
-        public IActionResult UpdateGroupInfo(string groupId, GroupInfoDto body)
+        public async Task<IActionResult> UpdateGroupInfo(string groupId, GroupInfoDto body)
         {
-            return Ok(_groupService.UpdateGroupInfo(groupId, body));
+            return Ok(await _groupService.UpdateGroupInfo(groupId, body));
         }
 
         [HttpPost]

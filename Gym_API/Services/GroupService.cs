@@ -11,15 +11,17 @@ namespace Gym_API.Services
     public class GroupService : IGroupService
     {
         private readonly ApplicationDbContext _db;
+        private readonly IUserService _userService;
 
-        public GroupService(ApplicationDbContext db)
+        public GroupService(IUserService userService,ApplicationDbContext db)
         {
             _db = db;
+            _userService = userService;
         }
 
         public Response AddGroup(GroupDto body)
         {
-            if(body.OpenDate > body.CloseDate)
+            if (body.OpenDate > body.CloseDate)
             {
                 throw new HttpRequestException("Invalid OpenDate & CloseDate", null, HttpStatusCode.BadRequest);
             }
@@ -34,7 +36,7 @@ namespace Gym_API.Services
                 CloseDate = body.CloseDate
             };
 
-            if(body.CustomerIds.Count > group.Limitation)
+            if (body.CustomerIds.Count > group.Limitation)
             {
                 throw new HttpRequestException("Customers or members can't over the limitation", null, HttpStatusCode.BadRequest);
             }
@@ -184,14 +186,15 @@ namespace Gym_API.Services
                 .Where(s => s.Group.Customers
                     .Contains(customer)
                     )
-                .Select(s => new {
-                    Id =s.Id,
+                .Select(s => new
+                {
+                    Id = s.Id,
                     Title = s.Title,
                     Description = s.Description,
                     StartDate = s.StartDate,
                     EndDate = s.EndDate
                 });
-               
+
             return schedules;
         }
 
@@ -321,16 +324,18 @@ namespace Gym_API.Services
             }).First();
 
 
-            if (group == null) {
+            if (group == null)
+            {
                 throw new HttpRequestException($"Group Id {groupId} not found", null, HttpStatusCode.NotFound);
             }
 
-            if(group.CloseDate < DateTime.Now)
+            if (group.CloseDate < DateTime.Now)
             {
                 throw new HttpRequestException("The group has been closed", null, HttpStatusCode.BadRequest);
             }
 
-            if(group.Customers.Count >= group.Limitation) {
+            if (group.Customers.Count >= group.Limitation)
+            {
                 throw new HttpRequestException("Customers or members can't over the limitation", null, HttpStatusCode.BadRequest);
             }
 
@@ -367,10 +372,10 @@ namespace Gym_API.Services
             return new Response { Message = $"Remove customer id {customerId} from the group successfully", Status = "Success" };
         }
 
-        public GroupInfoDto UpdateGroupInfo(string groupId,GroupInfoDto data)
+        public async Task<dynamic> UpdateGroupInfo(string groupId, GroupInfoDto data)
         {
             var group = _db.Groups.Find(groupId);
-
+              
             if (group == null)
             {
                 throw new HttpRequestException($"Group Id {groupId} not found", null, HttpStatusCode.NotFound);
@@ -382,16 +387,18 @@ namespace Gym_API.Services
             group.OpenDate = data.OpenDate;
             group.CloseDate = data.CloseDate;
 
-            if(group.TrainerId != data.TrainerId && data.TrainerId != null)
+            if (group.TrainerId != data.TrainerId && data.TrainerId != null)
             {
                 var trainer = _db.Coaches.Find(data.TrainerId);
 
                 group.Trainer = trainer;
             }
 
+            var groupTrainer = await _userService.GetUserInfoAsync(data.TrainerId);
+
             _db.SaveChanges();
 
-            return new GroupInfoDto
+            return new
             {
                 Id = group.Id,
                 Name = group.Name,
@@ -399,7 +406,7 @@ namespace Gym_API.Services
                 Limitation = group.Limitation,
                 OpenDate = group.OpenDate,
                 CloseDate = group.CloseDate,
-                Trainer = group.Trainer,
+                Trainer = groupTrainer,
             };
         }
     }

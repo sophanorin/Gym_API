@@ -7,7 +7,7 @@ namespace Gym_API.Dto
 
         public string Lastname { get; set; }
 
-        public string Fullname { get; set; }
+        public string? Fullname { get; set; }
 
         public string PhoneNumber { get; set; }
 

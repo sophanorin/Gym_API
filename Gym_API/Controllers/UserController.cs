@@ -37,7 +37,6 @@ namespace Gym_API.Controllers
             return Ok(await _userService.GetUserInfoAsync(Id));
         }
 
-        [Authorize(Roles = UserRoles.SeniorSupervisor)]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateUserInfo(string Id, [FromBody] UserInfoDto body)
