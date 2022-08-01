@@ -5,6 +5,7 @@ using Gym_API.Models;
 using Gym_API.Services.Interfaces;
 using Gym_API.Shared;
 using System.Net;
+using System.Linq;
 
 namespace Gym_API.Services
 {
@@ -95,6 +96,8 @@ namespace Gym_API.Services
                     Name = g.Name,
                     Description = g.Description,
                     Limitation = g.Limitation,
+                    IsFull = g.Customers.Count >= g.Limitation,
+                    TotalCustomers = g.Customers.Count,
                     Customers = g.Customers.Select(customer => new
                     {
                         Id = customer.Id,
@@ -226,6 +229,8 @@ namespace Gym_API.Services
                    Limitation = g.Limitation,
                    OpenDate = g.OpenDate,
                    CloseDate = g.CloseDate,
+                   IsFull = g.Customers.Count >= g.Limitation,
+                   TotalCustomers = g.Customers.Count,
                    Customers = g.Customers.Select(customer => new
                    {
                        Id = customer.Id,
@@ -342,6 +347,11 @@ namespace Gym_API.Services
             _db.Groups.Attach(group);
 
             var customer = _db.Customers.Find(customerId);
+
+            if (group.Customers.Contains(customer))
+            {
+                throw new HttpRequestException("Customer already existing in this group", null, HttpStatusCode.BadRequest);
+            }
 
             group.Customers.Add(customer);
             _db.SaveChanges();
