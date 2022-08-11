@@ -116,6 +116,7 @@ namespace Gym_API.Services
                         .Where(specialization => model.SpecializationIds.Contains(specialization.Id))
                         .ToList();
 
+
                     var coach = new Coach
                     {
                         Id = user.Id,
@@ -233,7 +234,7 @@ namespace Gym_API.Services
             return new ResLoginDto
             {
                 User = userInfo,
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
                 RefreshToken = refreshToken,
                 Expiration = token.ValidTo
             };

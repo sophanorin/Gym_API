@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Gym_API.Controllers
 {
-    [Authorize]
     [Route("api/{controller}")]
     [ApiController]
     public class UserController : Controller
@@ -37,6 +36,15 @@ namespace Gym_API.Controllers
             return Ok(await _userService.GetUserInfoAsync(Id));
         }
 
+        [HttpDelete]
+        [Authorize]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteUser(string Id)
+        {
+            return Ok(await _userService.DeleteUser(Id));
+        }
+
+        [Authorize]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateUserInfo(string Id, [FromBody] UserInfoDto body)

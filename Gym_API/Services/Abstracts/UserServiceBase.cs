@@ -35,6 +35,8 @@ namespace Gym_API.Services.Abstracts
 
         public abstract Task<Response> UpdateUserInfo(string coachId, UserInfoDto data);
 
+        public abstract Task<Response> DeleteUser(string Id);
+
         protected async Task<Response> UpdateCoachInfo(string coachId, UserInfoDto data)
         {
             Coach coach = _db.Coaches
@@ -139,7 +141,9 @@ namespace Gym_API.Services.Abstracts
         {
             var roles = await this._userManager.GetRolesAsync(user);
 
-            var _coach = _db.Coaches.Select(coach => new
+            var _coach = _db.Coaches
+                .Where(coach => coach.Id == user.CoachId)
+                .Select(coach => new
             {
                 Id = coach.Id,
                 Fullname = coach.Fullname,

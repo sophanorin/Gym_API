@@ -207,6 +207,18 @@ namespace Gym_API.Services
 
             return new Response { Message = $"Remove roles from user {userExist.UserName} successfully", Status = "Success" };
         }
+
+        public async override Task<Response> DeleteUser(string Id)
+        {
+            var user = await this._userManager.FindByIdAsync(Id);
+
+            if (user == null)
+                throw new HttpRequestException($"User {Id} not found", null, HttpStatusCode.BadRequest);
+
+            await this._userManager.DeleteAsync(user);
+
+            return new Response { Message = "Deleted successfully", Status = "Success" };
+        }
     }
 }
 
